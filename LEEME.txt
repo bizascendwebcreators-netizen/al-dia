@@ -1,0 +1,23 @@
+AL DÍA — CÓMO PUBLICARLA CON TU PROPIO ÍCONO
+Creado por Biz Ascend Web Creators
+==============================================
+
+1) Publicarla gratis (Netlify, unos 2 minutos)
+   - Entra a https://app.netlify.com/drop y crea una cuenta gratis.
+   - Arrastra la carpeta "al-dia-app" completa a la página.
+   - Te da un link como https://algo-raro.netlify.app
+   - En "Site configuration > Change site name" ponle un nombre, por ejemplo: aldia-finanzas
+     Tu link queda: https://aldia-finanzas.netlify.app
+
+2) Guardarla en la pantalla de inicio
+   - iPhone: abre el link en Safari > botón Compartir > "Agregar a pantalla de inicio".
+   - Android: abre el link en Chrome > menú (3 puntos) > "Instalar app" o "Agregar a pantalla principal".
+   Aparece con el logo de Al Día y abre a pantalla completa, como una app.
+
+3) Para actualizarla
+   - Cuando te mande una versión nueva, en Netlify ve a "Deploys" y arrastra otra vez la carpeta.
+   - Los datos de cada persona NO se borran al actualizar: viven en su propio teléfono.
+
+Importante
+   - Cada persona guarda sus datos solo en su teléfono. Nadie más los ve.
+   - Si la persona borra los datos del navegador o desinstala la app, se pierden.

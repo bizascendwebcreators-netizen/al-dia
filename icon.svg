@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Al Día">
+  <defs><clipPath id="r"><rect width="512" height="512" rx="112"/></clipPath></defs>
+  <g clip-path="url(#r)">
+    <rect width="512" height="512" fill="#14204A"/>
+    <rect y="446" width="512" height="66" fill="#D9A21B"/>
+  </g>
+  <circle cx="148" cy="146" r="50" fill="#D9A21B"/>
+  <path d="M112 270 L208 362 L404 166" fill="none" stroke="#C2187A" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 150 L412 150 L412 232" fill="none" stroke="#C2187A" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
