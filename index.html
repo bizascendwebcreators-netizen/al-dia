@@ -116,6 +116,15 @@ table.hist{width:100%;border-collapse:collapse;font-size:.88rem;min-width:720px}
   .rep-head .logo{width:44px;height:44px}
   #print{display:block}
 }
+/* bienvenida */
+.welcome{display:grid;gap:14px;padding:20px;border-radius:var(--r);background:var(--surface);border:2px solid var(--mustard);box-shadow:var(--shadow)}
+.steps3{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));counter-reset:st}
+.steps3 li{counter-increment:st}
+.steps3 button{width:100%;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);cursor:pointer}
+.steps3 button::before{content:counter(st);grid-row:1/3;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-family:var(--f-num);font-weight:600}
+.steps3 button:hover{border-color:var(--accent)}
+.steps3 span{font-size:.82rem;color:var(--muted)}
+.welcome > .btn{justify-self:start}
 /* PIN */
 .lockbtn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:7px 12px;background:rgba(255,255,255,.12);color:#fff;font-weight:600;cursor:pointer}
 .lockbtn:hover{background:rgba(255,255,255,.2)}
@@ -372,7 +381,7 @@ dialog form{display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
 (() => {
 "use strict";
 const KEY = "aldia-v1";
-const APP_VERSION = "5";
+const APP_VERSION = "6";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money = (n, d=0) => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("es-US",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -451,13 +460,15 @@ function blank(){
     budget:{income:0,amounts:{},custom:[]},credit:{onTime:100,inquiries:0,oldestYears:1,types:1,collections:0,history:[],done:{}}};
 }
 let S;
-try{ S = JSON.parse(localStorage.getItem(KEY)) || sample(); }catch(e){ S = sample(); }
+try{ S = JSON.parse(localStorage.getItem(KEY)) || blank(); }catch(e){ S = blank(); }
 // marcar pagos de ejemplo del mes actual ya vencidos como pagados, excepto uno (para mostrar un atraso)
-if(S.example && !S._seeded){
+function seedExamplePaid(){
+  if(!S.example || S._seeded) return;
   const k = ym(today); let skip = true;
   [...S.bills,...S.debts].forEach(x=>{ if(x.dueDay && x.dueDay < today.getDate()){ if(skip && x.dueDay>1){skip=false;return;} S.paid[x.id+"|"+k]=true; }});
   S._seeded = true;
 }
+seedExamplePaid();
 // migrar presupuesto de la versión anterior (categorías) al nuevo formato por pestañas
 if(!S.budget.amounts){
   const old = S.budget.cats || [];
@@ -574,13 +585,27 @@ function exampleBanner(){
   return `<div class="banner"><span><strong>Estás viendo datos de ejemplo.</strong> Explora la app y, cuando quieras, empieza con tus propias cuentas. Todo se guarda solo en este navegador.</span>
     <button class="btn sm primary" data-act="start-fresh">Empezar con mis datos</button></div>`;
 }
+function welcomeBanner(){
+  const empty = !S.example && !(+S.budget.income) && !Object.keys(S.budget.amounts).length && !S.debts.length && !S.bills.length && !S.accounts.length;
+  if(!empty) return "";
+  return `<div class="welcome">
+    <div><p class="eyebrow">Bienvenida a Al Día</p><h2>Pon tus finanzas al día en 3 pasos</h2>
+      <p class="muted" style="margin-top:4px">Todo lo que escribas se guarda solo en tu teléfono. Nadie más lo ve.</p></div>
+    <ol class="steps3">
+      <li><button data-go="presupuesto"><b>Escribe tu ingreso y tus gastos</b><span>Pestaña Mis gastos</span></button></li>
+      <li><button data-go="credito"><b>Agrega tus tarjetas y deudas</b><span>Pestaña Crédito</span></button></li>
+      <li><button data-go="calendario"><b>Agrega tus facturas del mes</b><span>Pestaña Calendario</span></button></li>
+    </ol>
+    <button class="btn sm ghost" data-act="load-example">¿Quieres ver primero un ejemplo lleno?</button>
+  </div>`;
+}
 
 function render(){
   if(locked) return;
   recordMonth();
   renderTabs();
   const v = {inicio:vInicio,calendario:vCal,presupuesto:vPres,crecer:vCrecer,credito:vCred}[view]();
-  $("#app").innerHTML = exampleBanner() + pinNudge() + `<section class="view" aria-labelledby="tab-${view}">${v}</section>` +
+  $("#app").innerHTML = exampleBanner() + welcomeBanner() + pinNudge() + `<section class="view" aria-labelledby="tab-${view}">${v}</section>` +
     `<footer class="sign"><span class="sign-line"></span><p>Creado por <strong>Biz Ascend Web Creators</strong></p><p class="small">© ${today.getFullYear()} · Al Día Finanzas · versión ${APP_VERSION}</p></footer>`;
 }
 
@@ -1396,6 +1421,7 @@ document.addEventListener("click", e=>{
     try{ navigator.clipboard.writeText(txt).then(done,()=>{ selectPaper(); toast("Selecciona y copia","El texto del reporte quedó seleccionado. Toca Copiar.",false,"!"); }); }catch(e){ selectPaper(); } }
   else if(a==="strat"){ S.plan.strategy=t.dataset.v; save(); render(); }
   else if(a==="apply-sim"){ const add=Math.round(wantsTotal()*simCut/100)+simPay; S.plan.extra=(+S.plan.extra||0)+add; simCut=0; simPay=0; save(); render(); toast("¡Decisión poderosa!",`Ahora pones ${money(add)} más al mes a tus deudas. Mira tu plan en la pestaña Crédito.`,true,"↑"); }
+  else if(a==="load-example"){ S=sample(); S._seeded=false; seedExamplePaid(); save(); go("presupuesto"); }
   else if(a==="start-fresh"){
     if(t.dataset.confirm!=="1"){ t.dataset.confirm="1"; t.textContent="Sí, borrar el ejemplo"; return; }
     S=blank(); save(); go("presupuesto");
